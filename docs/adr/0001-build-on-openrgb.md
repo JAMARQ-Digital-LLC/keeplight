@@ -33,3 +33,7 @@ The plan named `openrgb2` (0.4.1, 2026-09-05) as the Rust client, since it is th
 ## Amendment, 2026-11-13: tokio for the MCP server only
 
 Keeplight is the pilot for the fleet's agent-interface kit (`docs/agent-interfaces.md` in agentic-instructions), whose MCP server is built on `rmcp` and needs tokio. The owner decided on 2026-11-13 to lift the tokio ban for that edge only. `deny.toml` now allows tokio only as a dependency of `rmcp` (with its `tokio-stream` and `tokio-util`) and `keeplight-core`, where `mcp_server::serve` runs a single-thread runtime for `keeplight-cli mcp`. The OpenRGB client, the window and the keeper stay synchronous and never start a runtime. The bans on HTTP and TLS crates are unchanged, and `axum` joined them. See `docs/ai.md`.
+
+## Amendment, 2026-11-17: tokio banned again
+
+Agent kit 8 (jamarq-agent-kit#8) replaced `rmcp` with the kit's own small, synchronous stdio MCP server, so `keeplight-cli mcp` no longer needs tokio. `deny.toml` bans tokio outright again, and nothing in Keeplight starts an async runtime.

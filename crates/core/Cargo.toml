@@ -17,22 +17,13 @@ thiserror.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 # The agent-interface kit (src/agent_kit, copied from jamarq-agent-kit) and
-# Keeplight's MCP server. rmcp is stdio only: no HTTP, TLS or network
-# transport. tokio is used only inside the MCP server (`keeplight-cli mcp`);
-# the window, the keeper and the OpenRGB client stay synchronous.
+# Keeplight's MCP server. Since kit 8 the server is the kit's own: stdio
+# only, synchronous, no HTTP, TLS or network transport, and no rmcp or tokio.
 sha2 = "0.11"
 schemars = "1"
-rmcp = { version = "3.10", default-features = false, features = ["server", "macros", "transport-io"] }
-# "time": the kit's MCP serve needs timers (kit 2). rmcp already uses
-# tokio's timers, so it adds no crate.
-tokio = { version = "1", default-features = false, features = ["rt", "macros", "io-std", "sync", "time"] }
 
 [target.'cfg(windows)'.dependencies]
 windows = { version = "0.62", features = ["Win32_Foundation", "Win32_System_Diagnostics_ToolHelp", "Win32_System_Registry", "Win32_System_Services", "Win32_System_Threading", "Win32_UI_Shell", "Win32_UI_WindowsAndMessaging"] }
-
-[dev-dependencies]
-rmcp = { version = "3.10", default-features = false, features = ["server", "client", "macros", "transport-io"] }
-tokio = { version = "1", default-features = false, features = ["rt", "macros", "io-std", "io-util", "sync"] }
 
 [[example]]
 name = "fake-openrgb"
