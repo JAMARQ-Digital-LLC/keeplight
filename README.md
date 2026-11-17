@@ -58,3 +58,5 @@ Releases: a `v*` tag builds those into a draft GitHub release. Publishing the dr
 ## License
 
 GPL-3.0-only. The embedded Geist fonts are under the SIL Open Font License 1.1 (`assets/fonts/OFL.txt`).
+
+<!-- docs-only CI skip proof, closed unmerged -->
