@@ -14,7 +14,7 @@
 //! - [`journal`]: one JSON line per applied plan.
 //! - [`events`]: the JSON Lines event log, a file per day, kept 14 days.
 //! - [`diagnose`]: redaction for the `diagnose` bundle.
-//! - [`mcp`]: helpers for a stdio MCP server built on `rmcp`.
+//! - [`mcp`]: the stdio MCP server (JSON-RPC 2.0), and a test client.
 //! - [`connect`]: finding Claude Code, Gemini CLI and Codex CLI, and the
 //!   commands for a Connect button in Settings.
 
@@ -36,7 +36,7 @@ use sha2::{Digest, Sha256};
 
 /// The kit's version. Raised with every change to this folder, so a copy's
 /// version says which reference it came from.
-pub const KIT_VERSION: &str = "7";
+pub const KIT_VERSION: &str = "9";
 
 /// Milliseconds since 1970 (UTC).
 pub fn now_ms() -> u64 {

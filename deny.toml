@@ -11,6 +11,12 @@ ignore = [
     # the shipped exe. Slint 1.18.1 is the newest release. Expires 2027-02-08;
     # recorded in agentic-instructions docs/security-advisory-decisions.md.
     { id = "RUSTSEC-2026-0441", reason = "compile-time only via Slint's spin_on; no upgrade; expires 2027-02-08" },
+    # chrono is unmaintained, not vulnerable. Since agent kit 8 Keeplight's
+    # own code no longer needs it, but Slint's i-slint-core (1.18.1 and
+    # 1.19.0) requires it with no feature to turn it off, so it ships in
+    # keeplight.exe. Owner go 2026-11-17. Expires 2027-02-17; recorded in
+    # agentic-instructions docs/security-advisory-decisions.md.
+    { id = "RUSTSEC-2026-0543", reason = "chrono unmaintained, required by Slint's i-slint-core; no upgrade; expires 2027-02-17" },
 ]
 
 [licenses]
@@ -36,11 +42,10 @@ wildcards = "deny"
 allow-wildcard-paths = true
 # No HTTP or TLS crates. Keeplight's only connection is to OpenRGB on
 # 127.0.0.1, over a plain TCP socket from the standard library.
-# No async runtime either, except at one edge: the OpenRGB client, the window
-# and the keeper are synchronous on purpose. tokio is allowed only through
-# rmcp (with its tokio-stream and tokio-util) and keeplight-core's MCP server
-# (`keeplight-cli mcp`), owner decision
-# 2026-11-13 (docs/adr/0001-build-on-openrgb.md, docs/ai.md).
+# No async runtime either: the OpenRGB client, the window, the keeper and,
+# since agent kit 8, the MCP server (`keeplight-cli mcp`) are synchronous on
+# purpose. tokio came in only through rmcp, which kit 8 replaced
+# (docs/adr/0001-build-on-openrgb.md, docs/ai.md).
 deny = [
     { crate = "reqwest" },
     { crate = "hyper" },
@@ -50,7 +55,7 @@ deny = [
     { crate = "openssl" },
     { crate = "native-tls" },
     { crate = "rustls" },
-    { crate = "tokio", wrappers = ["rmcp", "tokio-stream", "tokio-util", "keeplight-core"] },
+    { crate = "tokio" },
     { crate = "axum" },
     # openrgb2 is GPL-2.0-only, which cannot be combined with this
     # GPL-3.0-only app, and openrgb is its unmaintained predecessor
