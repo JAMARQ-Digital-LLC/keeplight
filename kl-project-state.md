@@ -12,6 +12,7 @@ Agent-facing working state. The plan page is the owner-facing view; this file ho
 - Setup file: `%LOCALAPPDATA%\Keeplight\setup.json` (`KEEPLIGHT_DATA` overrides the folder). Format version 1; a newer or unreadable file is never saved over.
 - Env for tests: `KEEPLIGHT_OPENRGB` (SDK address), `KEEPLIGHT_DATA` (setup folder).
 - Theme: `crates/app/ui/theme.slint` is a byte copy of Modlist Launcher's (c04e8d0). Fixes land there first.
+- CI: `ci.yml` on GitHub-hosted runners (public repo): `Lint, test, and build` on windows-latest, `Dependency policy` (cargo-deny) on ubuntu-latest, both required. A `changes` job on ubuntu-latest skips both on docs-only PRs (root `*.md`, `docs/**/*.md`, `LICENSE*`; 2026-11-17, fleet standard in agentic-instructions `docs/github-actions-maintenance.md`).
 
 ## Current Structural Milestones / Active Feature Goals
 
