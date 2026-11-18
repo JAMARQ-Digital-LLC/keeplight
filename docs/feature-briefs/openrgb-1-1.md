@@ -1,6 +1,6 @@
 # Keeplight: test OpenRGB 1.1 and add it to the tested list (Feature session brief)
 
-Status: carded 2026-11-18 as Next Up item D in `kl-project-state.md`. Waits on the owner: picking it, and being at JASON-PC for the test (one admin prompt). Not started.
+Status: carded 2026-11-18 as Next Up item D in `kl-project-state.md`. Queued after C by the default order the owner took on 2026-11-18. Needs the owner at JASON-PC for the test (one admin prompt). Not started.
 
 **Title line:**
 

@@ -1,6 +1,6 @@
 # Keeplight: stage 06, the case map (Feature session brief)
 
-Status: carded 2026-11-18 as Next Up item B in `kl-project-state.md`. Waits on the owner: picking it as the stage after 05 (it is the plan page's recommendation, 2026-11-14; the owner has not chosen). Not started.
+Status: carded 2026-11-18 as Next Up item B in `kl-project-state.md`. The stage after 05: the owner took the recommended default on 2026-11-18 ("go with current defaults"), so it comes right after A. Needs the owner at JASON-PC for about 20 minutes once. Not started.
 
 **Title line:**
 

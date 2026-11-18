@@ -1,6 +1,6 @@
 # Keeplight: easy AI connect (Feature session brief)
 
-Status: carded 2026-11-18 as Next Up item C in `kl-project-state.md`. Waits on the owner: picking it as the stage after 05. Not started.
+Status: carded 2026-11-18 as Next Up item C in `kl-project-state.md`. Queued after B by the default order the owner took on 2026-11-18. Not started.
 
 **Title line:**
 
