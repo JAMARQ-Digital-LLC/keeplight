@@ -8,3 +8,6 @@
 .idea/
 Thumbs.db
 desktop.ini
+
+# Session worktrees
+.claude/worktrees/
