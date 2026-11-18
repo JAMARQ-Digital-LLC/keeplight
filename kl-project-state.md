@@ -51,6 +51,14 @@ Agent-facing working state. The plan page is the owner-facing view; this file ho
 - Real-light tests: one device at a time, to its current state, with a throwaway setup file. Never load an OpenRGB profile for testing.
 - Changes from AI tools need `aiChanges` on (only the window turns it on), a plan first, and a request; setColor is the only change that sets a color; never add a tool that switches the keeper or changes a setting.
 
+## Next Up
+
+Order (2026-11-18, set when the section was added for the fleet main-build task; the owner may reorder): A.
+
+### A. Windows builds for Atlas's Reinstall
+
+Add `main-build.yml`, the release's Windows build stamped `+main.<sha>` with no publishing, so Atlas can reinstall Keeplight on JASON-PC from main. Fleet: main-build. Fixes the update notice so a `+main` build is told only of a real newer release, and moves `release.yml` from the tag push to a dispatch the owner starts (owner, 2026-11-18). Brief: `docs/feature-briefs/main-build.md`
+
 ## Context Compaction Checklist
 
 - Branch and PR number of the current PR, and its CI state. Codex reviews each PR and `main` requires resolved conversations: answer and resolve its threads. Auto-merge is on.
