@@ -93,16 +93,18 @@ jobs:
           $ErrorActionPreference = 'Stop'
           $released = $env:VERSION.Split('+')[0]
           $setup = Get-Item "dist/Keeplight-$env:VERSION-setup.exe"
-          $info = $setup.VersionInfo
-          "Installer: $($setup.Name), product version $($info.ProductVersion), file version $($info.FileVersion)"
-          if ($info.ProductVersion -ne $env:VERSION) { throw "the installer's product version is $($info.ProductVersion)" }
-          if ($info.FileVersion -ne $released) { throw "the installer's file version is $($info.FileVersion)" }
+          # Inno Setup pads its version-info strings with spaces.
+          $product = $setup.VersionInfo.ProductVersion.Trim([char]0, ' ')
+          $file = $setup.VersionInfo.FileVersion.Trim([char]0, ' ')
+          "Installer: $($setup.Name), product version $product, file version $file"
+          if ($product -ne $env:VERSION) { throw "the installer's product version is $product" }
+          if ($file -ne $released) { throw "the installer's file version is $file" }
 
           $cli = & target/release/keeplight-cli.exe version
           "Command line: $cli"
           if ($cli -ne "keeplight-cli $env:VERSION") { throw "keeplight-cli version says $cli" }
 
-          $app = (Get-Item target/release/keeplight.exe).VersionInfo.ProductVersion
+          $app = (Get-Item target/release/keeplight.exe).VersionInfo.ProductVersion.Trim([char]0, ' ')
           "Window: product version $app"
           if ($app -ne $env:VERSION) { throw "keeplight.exe's product version is $app" }
 
