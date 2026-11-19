@@ -49,7 +49,9 @@ Set `KEEPLIGHT_OPENRGB` to another `host:port` to point Keeplight at a different
 
 `scripts/package.ps1` builds the portable zip and, when Inno Setup 6 is installed, the per-user installer into `dist/`. `scripts/generate-icon.ps1` redraws the icon in `assets/`.
 
-Releases: a `v*` tag builds those into a draft GitHub release. Publishing the draft also copies the installer to [jamarq-releases](https://github.com/JAMARQ-Digital-LLC/jamarq-releases) as `keeplight-<version>-x64-setup.exe`, where `keeplight-latest/release.json` names the newest one and its SHA-256 (`.github/workflows/publish-feed.yml`).
+Releases go out only when the owner asks: the Release workflow (`.github/workflows/release.yml`), started by hand on `main`, tags its head `v<version>` and builds those into a draft GitHub release, refusing a version already tagged. Publishing the draft also copies the installer to [jamarq-releases](https://github.com/JAMARQ-Digital-LLC/jamarq-releases) as `keeplight-<version>-x64-setup.exe`, where `keeplight-latest/release.json` names the newest one and its SHA-256 (`.github/workflows/publish-feed.yml`).
+
+Between releases, the Main build workflow (`.github/workflows/main-build.yml`, started by hand) builds the same installer from a main commit, stamped `<version>+main.<sha7>`, as a workflow artifact named `keeplight-main-<commit>` kept for 7 days. Nothing is published; it is how Atlas reinstalls Keeplight on the owner's PC. A main build's update notice offers only a release newer than the version it carries.
 
 ## Safety
 

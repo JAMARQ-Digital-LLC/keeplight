@@ -45,9 +45,17 @@ pub fn parse(text: &str) -> Result<Release, String> {
     Ok(r)
 }
 
-/// The release, when it is newer than `current`.
+/// The release, when it is newer than `current`. A build from main is
+/// stamped `<version>+main.<sha>` (`main-build.yml`) and carries the last
+/// released version, so only the part before `+` is compared: a main build
+/// of 0.2.3 is told of 0.2.4, never of 0.2.3 or older.
 pub fn newer(release: Release, current: &str) -> Option<Release> {
-    compare(&release.version, current).is_gt().then_some(release)
+    compare(&release.version, released_part(current)).is_gt().then_some(release)
+}
+
+/// The version without its build metadata (`0.2.3+main.abc1234` is `0.2.3`).
+fn released_part(version: &str) -> &str {
+    version.split_once('+').map_or(version, |(released, _)| released)
 }
 
 /// Asks the feed whether a Keeplight newer than this one is out. `Ok(None)`
@@ -96,6 +104,24 @@ mod tests {
         assert!(newer(r.clone(), "0.1.0").is_some());
         assert!(newer(r.clone(), "0.2.0").is_none());
         assert!(newer(r, "0.10.0").is_none());
+    }
+
+    #[test]
+    fn a_main_build_is_told_only_of_a_newer_release() {
+        let feed = |version: &str| parse(&GOOD.replace("0.2.0", version)).unwrap();
+        let main = "0.2.3+main.abc1234";
+        assert!(newer(feed("0.2.3"), main).is_none(), "the release it was built from");
+        assert!(newer(feed("0.2.1"), main).is_none(), "an older release, not a downgrade");
+        assert!(newer(feed("0.1.9"), main).is_none());
+        assert!(newer(feed("0.2.4"), main).is_some());
+        assert!(newer(feed("0.3.0"), main).is_some());
+        assert!(newer(feed("0.2.0"), "0.2.0+main.abc1234").is_none());
+        assert!(newer(feed("0.2.1"), "0.2.0+main.abc1234").is_some());
+    }
+
+    #[test]
+    fn a_feed_naming_a_main_build_is_refused() {
+        assert!(parse(&GOOD.replace("0.2.0\",\"notes", "0.2.0+main.abc1234\",\"notes")).is_err());
     }
 
     #[test]

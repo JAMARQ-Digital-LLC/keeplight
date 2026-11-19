@@ -10,11 +10,21 @@
 #ifndef OutputDir
   #define OutputDir "..\dist"
 #endif
+; A build from main is stamped <version>+main.<sha> (main-build.yml). The
+; uninstall entry's DisplayVersion and the setup's product version show
+; AppVersion as it is; the file version takes numbers only, so it gets the
+; part before the "+".
+#if Pos("+", AppVersion) > 0
+  #define FileVersion Copy(AppVersion, 1, Pos("+", AppVersion) - 1)
+#else
+  #define FileVersion AppVersion
+#endif
 
 [Setup]
 AppId={{A192D59D-D878-4270-9A23-7E44F8EB9BAA}
 AppName=Keeplight
 AppVersion={#AppVersion}
+VersionInfoVersion={#FileVersion}
 AppPublisher=Keeplight contributors
 AppPublisherURL=https://github.com/JAMARQ-Digital-LLC/keeplight
 AppSupportURL=https://github.com/JAMARQ-Digital-LLC/keeplight/issues
