@@ -43,7 +43,7 @@ cargo test --workspace
 cargo run -p keeplight
 ```
 
-Set `KEEPLIGHT_OPENRGB` to another `host:port` to point Keeplight at a different SDK server, such as a test one, and `KEEPLIGHT_DATA` to another folder for the setup file and log.
+A build from source is the dev app, apart from a release build from a full checkout (the installer's): it keeps its files in `%LOCALAPPDATA%\Keeplight Dev`, uses the startup entry `Keeplight Dev`, never checks for updates or downloads, and refuses the real OpenRGB on 127.0.0.1:6742 unless `KEEPLIGHT_NETWORK=live` is set. `cargo test` and `cargo run` also start in scratch mode (`.cargo/config.toml`), which needs a fake OpenRGB and a throwaway folder; see [CONTRIBUTING.md](CONTRIBUTING.md#dev-builds-and-scratch-mode).
 
 `cargo run -p keeplight-cli -- devices` runs the command line from source. `cargo run -p keeplight-core --features testing --example fake-openrgb` starts a fake SDK server with two RAM sticks and a keyboard and prints its address. `scripts/smoke-mouse-clicks.ps1` clicks the real window's buttons against it (CI runs it too).
 

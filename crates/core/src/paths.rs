@@ -10,15 +10,11 @@ pub struct Paths {
 }
 
 impl Paths {
-    /// `KEEPLIGHT_DATA` when set (tests and smoke tests point it at a
-    /// throwaway folder), otherwise `%LOCALAPPDATA%\Keeplight`.
+    /// `KEEPLIGHT_DATA_DIR` (or its older name `KEEPLIGHT_DATA`) when set,
+    /// otherwise `%LOCALAPPDATA%\Keeplight`, or `Keeplight Dev` for a dev
+    /// build (`crate::scratch`).
     pub fn from_env() -> Paths {
-        let data =
-            std::env::var_os("KEEPLIGHT_DATA").filter(|d| !d.is_empty()).map(PathBuf::from).unwrap_or_else(|| {
-                let base = std::env::var_os("LOCALAPPDATA").map(PathBuf::from).unwrap_or_else(std::env::temp_dir);
-                base.join("Keeplight")
-            });
-        Paths { data }
+        Paths { data: crate::scratch::Env::from_env().data() }
     }
 
     pub fn setup(&self) -> PathBuf {
@@ -51,12 +47,10 @@ impl Paths {
 }
 
 /// OpenRGB's SDK address: `KEEPLIGHT_OPENRGB` when set (a fake server in
-/// tests), otherwise 127.0.0.1:6742.
+/// tests), otherwise 127.0.0.1:6742, which a dev or scratch build refuses to
+/// connect to (`crate::scratch`).
 pub fn openrgb_address() -> String {
-    std::env::var("KEEPLIGHT_OPENRGB")
-        .ok()
-        .filter(|a| !a.is_empty())
-        .unwrap_or_else(|| crate::sdk::DEFAULT_ADDRESS.to_string())
+    crate::scratch::Env::from_env().openrgb()
 }
 
 /// Whether an OpenRGB address is on this PC: a loopback host. Anything else

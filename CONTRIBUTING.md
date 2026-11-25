@@ -18,7 +18,7 @@ Keeplight is built for one PC (see the README), so a report about hardware it ha
 
 ## Working on it
 
-You need the Rust toolchain (stable, MSVC), Visual Studio Build Tools, and OpenRGB with its SDK server on. Set `KEEPLIGHT_OPENRGB` to another `host:port` to run against a test server instead of real lights.
+You need the Rust toolchain (stable, MSVC) and Visual Studio Build Tools. OpenRGB is needed only to try a build on real lights.
 
 ```powershell
 cargo fmt --all
@@ -28,6 +28,22 @@ cargo build --release -p keeplight
 ```
 
 CI runs all of these on every pull request, plus `cargo deny check`. `cargo deny` bans HTTP and TLS crates, tokio, and the GPL-2.0-only OpenRGB crates, and rejects yanked or vulnerable ones. Both CI checks must pass before a pull request can merge. A pull request that changes only root Markdown, Markdown under `docs/` or `LICENSE` skips both checks, which then pass as skipped; a `.github/` change always runs them.
+
+### Dev builds and scratch mode
+
+A debug build, or any build from a git worktree, is the dev app (`crates/core/build.rs`, `crates/core/src/scratch.rs`). Only a release build from a full checkout, such as the installer's, is the release app. The dev app has its own data folder (`%LOCALAPPDATA%\Keeplight Dev`) and startup entry (`Keeplight Dev`), so its keeper's mutex and stop event never meet the installed keeper's. It never checks for updates or downloads an installer, and it refuses the real OpenRGB (port 6742, or another computer) unless `KEEPLIGHT_NETWORK=live` is set by name. It never opens `%LOCALAPPDATA%\Keeplight` or uses the startup entry `Keeplight`.
+
+`KEEPLIGHT_SCRATCH=1` makes those refusals strict, for any build. `.cargo/config.toml` sets it for every `cargo test` and `cargo run`, and the smoke test sets it too. A scratch run refuses to start unless:
+
+| Variable | In scratch |
+| --- | --- |
+| `KEEPLIGHT_DATA_DIR` | A full path to a throwaway folder, not under `%APPDATA%` or `%LOCALAPPDATA%` except the temp folder. `KEEPLIGHT_DATA` is its older name and still works. |
+| `KEEPLIGHT_OPENRGB` | A fake OpenRGB on a loopback port the test owns, never 6742. `cargo run -p keeplight-core --features testing --example fake-openrgb` prints one. |
+| `KEEPLIGHT_STARTUP_NAME` | A test name such as `Keeplight-smoke-1`, never `Keeplight` or `Keeplight Dev`. |
+| `KEEPLIGHT_NETWORK` | Unset or `offline`; `live` is refused. |
+| `KEEPLIGHT_SECRETS` | Unset or `memory`. Keeplight keeps no secrets; the name is the fleet's. |
+
+To try a dev build on the real lights, by hand: `$env:KEEPLIGHT_SCRATCH = '0'; $env:KEEPLIGHT_NETWORK = 'live'; cargo run -p keeplight`. A test that needs the real thing is `#[ignore]` and named `live_*`. Every front end limits its data folder to the current user when it starts: one access entry, inherited, nothing from the parent folder.
 
 - Keep each pull request to one change.
 - Add tests for behaviour that can be tested. Platform-neutral logic belongs in `crates/core`, where it is unit tested; the SDK client is tested against a fake server.

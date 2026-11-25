@@ -14,6 +14,10 @@ use keeplight_core::keep::{ActionError, Outcome, Run};
 use keeplight_core::keeper::{self, Notices, Timing, Trigger};
 
 pub fn run() -> i32 {
+    // No window and nowhere safe to write: a refused keeper just stops.
+    if keeplight_core::scratch::launch().is_err() {
+        return 2;
+    }
     let Some(_only) = crate::platform::SingleInstance::acquire(&crate::platform::keeper_name()) else {
         return 0;
     };

@@ -36,6 +36,8 @@ pub enum SdkError {
     Io(#[from] std::io::Error),
     #[error("OpenRGB sent something Keeplight could not read: {0}")]
     Protocol(String),
+    #[error("{0}")]
+    Refused(String),
 }
 
 /// Everything OpenRGB reported in one pass.
@@ -54,6 +56,9 @@ pub struct Client {
 
 impl Client {
     pub fn connect(address: &str) -> Result<Self, SdkError> {
+        // Checked here, where every request starts, so no front end or test
+        // reaches the real OpenRGB from a dev or scratch run.
+        crate::scratch::Env::from_env().may_connect(address).map_err(|r| SdkError::Refused(r.0))?;
         let unreachable = |source| SdkError::Unreachable { address: address.to_string(), source };
         let addr: SocketAddr = address
             .to_socket_addrs()

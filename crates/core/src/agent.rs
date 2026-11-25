@@ -92,6 +92,14 @@ pub mod codes {
         true,
         Exit::Failed,
     );
+    pub const SCRATCH_REFUSED: ErrorCode = ErrorCode::new(
+        "scratch.refused",
+        "This dev or scratch run of Keeplight refused the real OpenRGB, data folder, startup entry or network.",
+        "Point KEEPLIGHT_OPENRGB and KEEPLIGHT_DATA_DIR at a test server and a throwaway folder, or use the \
+         installed Keeplight.",
+        false,
+        Exit::Refused,
+    );
 }
 
 /// Every code Keeplight can return: the kit's, then its own.
@@ -104,6 +112,7 @@ pub static ALL_CODES: std::sync::LazyLock<Vec<ErrorCode>> = std::sync::LazyLock:
         codes::CANT_COLOR,
         codes::ZONE_NOT_FOUND,
         codes::OPENRGB_UNREACHABLE,
+        codes::SCRATCH_REFUSED,
     ])
 });
 
@@ -377,6 +386,7 @@ fn describe(k: &Kept) -> String {
 
 fn from_sdk(e: SdkError) -> AgentError {
     match e {
+        SdkError::Refused(why) => AgentError::new(codes::SCRATCH_REFUSED, format!("{why} Nothing was changed.")),
         SdkError::Unreachable { address, .. } => AgentError::new(
             codes::OPENRGB_UNREACHABLE,
             format!("OpenRGB isn't answering at {address}. Nothing was changed."),

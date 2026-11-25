@@ -4,7 +4,7 @@ Keeplight's promise is that it only changes lights you have set, and only to wha
 
 ## Sent to OpenRGB
 
-Keeplight connects to OpenRGB's SDK server at `127.0.0.1:6742`, or the `host:port` in `KEEPLIGHT_OPENRGB`.
+Keeplight connects to OpenRGB's SDK server at `127.0.0.1:6742`, or the `host:port` in `KEEPLIGHT_OPENRGB`. A dev build (anything but a release build from a full checkout) and every scratch run refuse port 6742 and other computers before connecting; a dev build allows them only with `KEEPLIGHT_NETWORK=live`, a scratch run never (`core::scratch`, CONTRIBUTING.md).
 
 Reading, which happens every few seconds while the window is open:
 
@@ -36,13 +36,14 @@ Tests against a fake server hold this, including `put_back_all_restores_every_ke
 
 ## Written by the app
 
-- `%LOCALAPPDATA%\Keeplight\setup.json`, or `setup.json` in `KEEPLIGHT_DATA` when that is set: the devices you pressed **Keep this** on, each with its product name, location, light count, mode and colors, plus what each device you stopped keeping was kept as. Written through a temporary file and a rename. A setup Keeplight can't read is never saved over; the window says so and turns Keep and Put back off.
+- The data folder, `%LOCALAPPDATA%\Keeplight` (`Keeplight Dev` for a dev build), or `KEEPLIGHT_DATA_DIR` (older name `KEEPLIGHT_DATA`) when set. Each front end limits it to the current user when it starts: one inherited access entry, nothing from the parent folder.
+- `setup.json` in it: the devices you pressed **Keep this** on, each with its product name, location, light count, mode and colors, plus what each device you stopped keeping was kept as. Written through a temporary file and a rename. A setup Keeplight can't read is never saved over; the window says so and turns Keep and Put back off.
 - `plans\<16 hex digits>.json`: plans from the command line and AI tools, deleted when applied or once expired. `journal.jsonl` and `logs\keeplight-YYYY-MM-DD.jsonl`: see "Changes from AI tools" above. `settings.json` also holds `aiChanges`.
 - `setup.lock` beside it: an empty file the window and the keeper lock while they change the setup or send a kept setup, so a device you stopped keeping can't be put back by a keeper run that read the setup earlier.
 - `keeper.log` beside it: one line each time the keeper runs, saying how many kept devices it put back, plus a line for each that didn't hold. Trimmed to its last 400 lines once it passes 800.
 - `downloads\` beside it: pinned installers you chose to download, kept after installing so a reinstall needs no second download.
 - `settings.json` beside it: Keeplight's preferences, today only whether the keeper shows its icon in the notification area (off by default). A missing or unreadable file means the defaults.
-- The startup entry `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`, value `Keeplight`, holding `"<path to keeplight.exe>" --keep`. Written only when you turn on **Put kept lights back when you sign in**, and removed when you turn it off or uninstall. `KEEPLIGHT_STARTUP_NAME` renames the value, which the smoke test uses so it never touches the real one.
+- The startup entry `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`, value `Keeplight` (`Keeplight Dev` for a dev build), holding `"<path to keeplight.exe>" --keep`. Written only when you turn on **Put kept lights back when you sign in**, and removed when you turn it off or uninstall. `KEEPLIGHT_STARTUP_NAME` renames the value, which the smoke test uses so it never touches the real one; a dev build refuses the name `Keeplight`, and a scratch run refuses both real names.
 
 ## Changes from AI tools and the command line
 
@@ -59,12 +60,12 @@ The one time Keeplight uses the internet, and the one time it asks for admin rig
 
 - **Only when you ask, only from the window.** When OpenRGB or PawnIO is missing or older than the version Keeplight is tested with, the window offers **Install <name> <version>…**. The button first shows what will happen (the file, its size, the site), and nothing starts until **Download and install**. AI tools and the command line can't install anything, and a newer, untested version is never downgraded.
 - **Pinned.** Each installer is listed in `core::installs::TESTED` with its official https link, exact size and SHA-256: OpenRGB 1.0.0's MSI from codeberg.org, the very package installed on JASON-PC; PawnIO 2.2.0's setup from GitHub, whose hash matches GitHub's own and which is signed by its author. A newer version joins the list only after a test on the real PC.
-- **Downloaded by Windows' own `curl.exe`** (`%SystemRoot%\System32`, by full path), https only, redirects https only, and at most the pinned size, into `%LOCALAPPDATA%\Keeplight\downloads`. A file that differs in size or hash is deleted and nothing runs. The file is checked again just before it runs.
+- **Downloaded by Windows' own `curl.exe`** (`%SystemRoot%\System32`, by full path), https only, redirects https only, and at most the pinned size, into `downloads` in the data folder. A dev build downloads and installs nothing unless `KEEPLIGHT_NETWORK=live`, and a scratch run never does. A file that differs in size or hash is deleted and nothing runs. The file is checked again just before it runs.
 - **Run with Windows' admin prompt.** The official installer, with its own window (`msiexec /i` for OpenRGB's MSI, PawnIO's setup as it is). Declining the prompt or cancelling installs nothing, and the window says so. The OpenRGB MSI installs OpenRGB's service; Keeplight's keeper puts kept devices back when OpenRGB comes back.
 
 ## Asking whether a newer Keeplight is out
 
-- When the window opens, and once a day while it stays open, it asks the shared release feed for `keeplight-latest/release.json` (`core::update::FEED`, on github.com) with Windows' `curl.exe`: https only, at most 64 KB. Nothing about you or this PC is sent beyond the request itself. The keeper never asks.
+- When the window opens, and once a day while it stays open, it asks the shared release feed for `keeplight-latest/release.json` (`core::update::FEED`, on github.com) with Windows' `curl.exe`: https only, at most 64 KB. Nothing about you or this PC is sent beyond the request itself. The keeper never asks, and a dev build or scratch run never asks unless a dev build has `KEEPLIGHT_NETWORK=live`.
 - A newer version is only shown, with a **Download** button that opens its installer link in your browser. Keeplight never downloads or installs itself. A manifest whose installer isn't in the feed's own Keeplight releases is ignored.
 - **Tell me when a new Keeplight is out** (on by default) turns the check off; it's saved as `noUpdateCheck` in `settings.json`.
 
@@ -81,7 +82,7 @@ The one time Keeplight uses the internet, and the one time it asks for admin rig
   - it listens to OpenRGB as above;
   - triggers that arrive within 3 seconds of each other become one run.
 - A named mutex (`Local\Keeplight.Keeper`) lets only one keeper run at a time.
-- A named event (`Local\Keeplight.Keeper.Stop`) is how the window stops it when you turn the switch off. Both names follow `KEEPLIGHT_STARTUP_NAME`, so a smoke test never stops your keeper.
+- A named event (`Local\Keeplight.Keeper.Stop`) is how the window stops it when you turn the switch off. Both names follow the startup entry's name, `Keeplight Dev` for a dev build or `KEEPLIGHT_STARTUP_NAME`, so a dev build or smoke test never stops your keeper.
 - The keeper's icon in the notification area, from a hidden window on its own thread. It is shown while the keeper runs when **Show the keeper's icon in the notification area** is on, and re-checked every 2 seconds. Clicking it opens Keeplight. Its menu has **Open Keeplight** and **Put kept lights back now**, which puts back kept devices exactly as a wake does.
 - A Windows notification when a run leaves a kept device not put back, or can't reach OpenRGB. It is shown once when the problems appear or change, not again on every wake while they stay the same. With the icon off, the icon appears only for the notification and goes away when Windows closes it. Nothing is sent anywhere; the notification is local.
 - The window starts no process except the keeper and, when you install OpenRGB or PawnIO, Windows' `curl.exe` and that installer (see "Installing OpenRGB and PawnIO"). The keeper's icon starts no process except the window. The uninstaller stops a running `keeplight.exe` before removing it. The installer, put over an earlier copy, first stops `keeplight-cli.exe` (an AI app's MCP server, which then loses Keeplight's tools until its next session) and `keeplight.exe` (the window and the keeper), since Windows won't replace a running program; it starts the keeper again when its sign-in switch is on.

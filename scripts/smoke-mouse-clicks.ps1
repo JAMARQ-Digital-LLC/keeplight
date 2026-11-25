@@ -2,7 +2,9 @@
 # Automation's Invoke skips the mouse path, so a button can pass other tests
 # while ignoring clicks (the theme bug fixed in #4). Posts mouse messages
 # straight to the window (the real cursor never moves) against a fake OpenRGB
-# server and a throwaway setup folder, and exits 1 if a click does not act.
+# server and a throwaway setup folder, in scratch mode (KEEPLIGHT_SCRATCH=1,
+# so the app refuses the real OpenRGB, folders, startup entry and network),
+# and exits 1 if a click does not act.
 # The "Keep" buttons start without keyboard focus, which is the case the bug
 # broke. Adapted from Modlist Launcher's scripts/smoke-mouse-clicks.ps1.
 #
@@ -12,6 +14,11 @@ param(
     [string] $Fake = (Join-Path $PSScriptRoot '..\target\release\examples\fake-openrgb.exe')
 )
 $ErrorActionPreference = 'Stop'
+# Never the installed Keeplight: only a build from a checkout.
+$exePath = (Resolve-Path $Exe).Path
+foreach ($installed in "$env:LOCALAPPDATA\Programs\Keeplight", "$env:ProgramFiles\Keeplight", "${env:ProgramFiles(x86)}\Keeplight") {
+    if ($exePath.StartsWith("$installed\", [StringComparison]::OrdinalIgnoreCase)) { throw "refusing the installed Keeplight at $exePath; pass a build from target\" }
+}
 Add-Type -AssemblyName UIAutomationClient, UIAutomationTypes
 Add-Type @"
 using System; using System.Runtime.InteropServices;
@@ -51,8 +58,11 @@ try {
     if (-not $address) { throw 'the fake OpenRGB server did not start' }
 
     $psi = [System.Diagnostics.ProcessStartInfo]::new((Resolve-Path $Exe))
+    $psi.Environment['KEEPLIGHT_SCRATCH'] = '1'
+    $psi.Environment['KEEPLIGHT_NETWORK'] = 'offline'
+    $psi.Environment['KEEPLIGHT_SECRETS'] = 'memory'
     $psi.Environment['KEEPLIGHT_OPENRGB'] = $address
-    $psi.Environment['KEEPLIGHT_DATA'] = $work
+    $psi.Environment['KEEPLIGHT_DATA_DIR'] = $work
     $psi.Environment['KEEPLIGHT_STARTUP_NAME'] = $entry
     $p = [System.Diagnostics.Process]::Start($psi)
 

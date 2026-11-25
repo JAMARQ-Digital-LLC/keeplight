@@ -37,6 +37,17 @@ pub enum InstallError {
     Declined,
     #[error("Windows couldn't start the installer: {0}")]
     Start(String),
+    #[error(
+        "This dev or scratch run of Keeplight doesn't download or install anything (KEEPLIGHT_NETWORK=live allows \
+         it in a dev build)."
+    )]
+    Offline,
+}
+
+/// Refuses downloads and installer runs unless the network is live
+/// (`crate::scratch`).
+fn live() -> Result<(), InstallError> {
+    if crate::scratch::Env::from_env().network_live() { Ok(()) } else { Err(InstallError::Offline) }
 }
 
 /// How an installer run ended.
@@ -142,6 +153,7 @@ pub(crate) fn run_curl(args: Vec<String>) -> Result<Vec<u8>, InstallError> {
 
 /// Downloads `pinned` into `dir` and checks it. Returns the checked file.
 pub fn download(pinned: &Pinned, dir: &Path) -> Result<PathBuf, InstallError> {
+    live()?;
     download_from(pinned, pinned.url, dir, "https")
 }
 
@@ -175,6 +187,7 @@ fn command_for(path: &Path, kind: Kind) -> (String, String) {
 /// reports how it ended. The file is checked again first, so nothing can
 /// swap it between download and run.
 pub fn run(path: &Path, pinned: &Pinned) -> Result<Finished, InstallError> {
+    live()?;
     verify(path, pinned)?;
     let (program, args) = command_for(path, pinned.kind);
     elevated::run(&program, &args).map(finished)
@@ -312,6 +325,15 @@ mod tests {
     }
 
     #[test]
+    fn scratch_downloads_and_installs_nothing() {
+        let d = dir("offline");
+        let t = &crate::installs::TESTED[0];
+        assert!(matches!(download(t, &d), Err(InstallError::Offline)));
+        assert!(matches!(run(&d.join(t.file), t), Err(InstallError::Offline)));
+        assert!(!d.join(t.file).exists());
+    }
+
+    #[test]
     fn only_https_is_allowed_for_real_downloads() {
         let args = curl_args("https://codeberg.org/x.msi", Some(Path::new("out")), 10, "https");
         assert!(args.windows(2).any(|w| w == ["--proto", "=https"]));
@@ -319,7 +341,7 @@ mod tests {
         assert!(args.windows(2).any(|w| w == ["--max-filesize", "10"]));
         // A plain-http link is refused by curl itself.
         let pinned = pinned_for(b"x");
-        let err = download(&Pinned { url: "http://127.0.0.1:9/x", ..pinned }, &dir("http")).unwrap_err();
+        let err = download_from(&pinned, "http://127.0.0.1:9/x", &dir("http"), "https").unwrap_err();
         assert!(matches!(err, InstallError::Download(_)), "{err}");
     }
 
@@ -336,10 +358,10 @@ mod tests {
     }
 
     /// The real pinned downloads still match (network; run by hand with
-    /// `cargo test -p keeplight-core real_pinned -- --ignored`).
+    /// `KEEPLIGHT_SCRATCH=0 KEEPLIGHT_NETWORK=live cargo test -p keeplight-core live_real_pinned -- --ignored`).
     #[test]
     #[ignore]
-    fn real_pinned_downloads_match() {
+    fn live_real_pinned_downloads_match() {
         let d = dir("real");
         for t in crate::installs::TESTED {
             download(t, &d).unwrap_or_else(|e| panic!("{}: {e}", t.file));
