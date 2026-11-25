@@ -133,6 +133,7 @@ mod tests {
     /// answered them (recorded from main before the change, two sessions in
     /// one file). One difference on purpose: rmcp refused a `ping` without
     /// `_meta` once a client used per-request `_meta`; the kit answers it.
+    /// The error-code list has gained `scratch.refused` since the recording.
     #[test]
     fn clients_see_the_same_server_as_under_rmcp() {
         let data = scratch("mcp-v7");

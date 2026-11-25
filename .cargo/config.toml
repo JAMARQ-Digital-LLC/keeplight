@@ -1,0 +1,6 @@
+# Every `cargo test` and `cargo run` starts in scratch mode
+# (crates/core/src/scratch.rs): no real OpenRGB, data folder, startup entry or
+# network. A value already in the environment wins, so a hand-run dev window
+# against the real lights is `KEEPLIGHT_SCRATCH=0` plus `KEEPLIGHT_NETWORK=live`.
+[env]
+KEEPLIGHT_SCRATCH = "1"

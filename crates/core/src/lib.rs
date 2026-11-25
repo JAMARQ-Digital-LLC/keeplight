@@ -20,6 +20,7 @@ pub mod keeper;
 pub mod lit_by;
 pub mod mcp_server;
 pub mod paths;
+pub mod scratch;
 pub mod sdk;
 pub mod settings;
 pub mod update;

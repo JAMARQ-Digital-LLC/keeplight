@@ -22,6 +22,10 @@ const REFRESH: Duration = Duration::from_secs(3);
 const UPDATE_EVERY: Duration = Duration::from_secs(24 * 60 * 60);
 
 pub fn run() -> i32 {
+    if let Err(refused) = keeplight_core::scratch::launch() {
+        crate::show_message("Keeplight didn't start", &refused.0);
+        return 2;
+    }
     let ui = match AppWindow::new() {
         Ok(ui) => ui,
         Err(e) => {

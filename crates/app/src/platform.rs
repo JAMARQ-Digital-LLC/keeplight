@@ -195,7 +195,8 @@ pub fn open_in_browser(url: &str) {
 }
 
 /// The per-user startup entry that runs the keeper at sign-in:
-/// `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`, value `Keeplight`.
+/// `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`, value `Keeplight`
+/// (`Keeplight Dev` for a dev build).
 pub mod startup {
     #[cfg(windows)]
     use windows::Win32::System::Registry::{
@@ -206,10 +207,11 @@ pub mod startup {
 
     const KEY: &str = r"Software\Microsoft\Windows\CurrentVersion\Run";
 
-    /// The value's name: `Keeplight`, or `KEEPLIGHT_STARTUP_NAME` when set, so
-    /// the smoke test can click the switch without touching the real entry.
+    /// The value's name: `Keeplight` (`Keeplight Dev` for a dev build), or
+    /// `KEEPLIGHT_STARTUP_NAME` when set, so the smoke test can click the
+    /// switch without touching the real entry.
     pub fn value_name() -> String {
-        std::env::var("KEEPLIGHT_STARTUP_NAME").ok().filter(|v| !v.is_empty()).unwrap_or_else(|| "Keeplight".into())
+        keeplight_core::scratch::Env::from_env().startup_name()
     }
 
     /// The command this exe would register: itself, quoted, with `--keep`.
@@ -260,6 +262,7 @@ pub mod startup {
     /// Registers `command`, or removes the entry when `None`.
     #[cfg(windows)]
     pub fn set(command: Option<&str>) -> std::io::Result<()> {
+        keeplight_core::scratch::Env::from_env().may_write_startup().map_err(std::io::Error::other)?;
         let (key, value) = (super::wide(KEY), super::wide(&value_name()));
         let status = match command {
             Some(cmd) => {

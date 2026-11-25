@@ -148,6 +148,10 @@ fn print(json: bool, value: &impl serde::Serialize, text: impl FnOnce() -> Strin
 
 fn run(args: &Args) -> Result<(), AgentError> {
     let json = args.json;
+    if !matches!(args.command, Command::Help | Command::Version | Command::ErrorCodes) {
+        keeplight_core::scratch::launch()
+            .map_err(|r| AgentError::new(keeplight_core::agent::codes::SCRATCH_REFUSED, r.0))?;
+    }
     match &args.command {
         Command::Help => println!("{USAGE}"),
         Command::Version => println!("keeplight-cli {}", env!("CARGO_PKG_VERSION")),

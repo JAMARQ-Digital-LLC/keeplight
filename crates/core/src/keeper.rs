@@ -98,7 +98,7 @@ pub fn watch(address: &str, triggers: &Sender<Trigger>, stop: &AtomicBool, timin
                     }
                 }
                 Ok(_) => {}
-                Err(SdkError::Io(_)) | Err(SdkError::Unreachable { .. }) | Err(SdkError::Protocol(_)) => {
+                Err(SdkError::Io(_) | SdkError::Unreachable { .. } | SdkError::Protocol(_) | SdkError::Refused(_)) => {
                     lost = true;
                     break;
                 }

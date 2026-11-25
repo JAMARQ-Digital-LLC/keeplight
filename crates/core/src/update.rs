@@ -61,6 +61,10 @@ fn released_part(version: &str) -> &str {
 /// Asks the feed whether a Keeplight newer than this one is out. `Ok(None)`
 /// when there's nothing newer, including before the first release.
 pub fn check() -> Result<Option<Release>, String> {
+    // A dev or scratch run never asks (`crate::scratch`).
+    if !crate::scratch::Env::from_env().network_live() {
+        return Err("offline: this run doesn't check for updates".into());
+    }
     check_at(FEED, "https", env!("CARGO_PKG_VERSION"))
 }
 
@@ -130,6 +134,11 @@ mod tests {
         assert!(parse(&elsewhere).unwrap_err().contains("outside"));
         assert!(parse(&GOOD.replace("0.2.0\",\"notes", "0.2\",\"notes")).is_err());
         assert!(parse("<html>").is_err());
+    }
+
+    #[test]
+    fn scratch_never_asks_the_feed() {
+        assert!(check().unwrap_err().contains("offline"));
     }
 
     #[test]
