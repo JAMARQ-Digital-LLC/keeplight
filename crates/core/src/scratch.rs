@@ -541,6 +541,40 @@ mod tests {
         assert!(refused(&env).contains("KEEPLIGHT_SECRETS"));
     }
 
+    /// The trustee of a DACL's only entry, checking the entry starts with
+    /// `rights` (type, flags and access). SDDL may write the trustee as an
+    /// alias, such as `LA` for the built-in Administrator CI runs as.
+    #[cfg(windows)]
+    fn sole_ace_trustee<'a>(sddl: &'a str, rights: &str) -> &'a str {
+        let ace = sddl.split_once('(').and_then(|(_, rest)| rest.strip_suffix(')')).expect("one entry");
+        ace.strip_prefix(rights).unwrap_or_else(|| panic!("entry is {rights}<trustee>: {sddl}"))
+    }
+
+    /// Whether two SID strings, either of which may be an SDDL alias, name the
+    /// same account.
+    #[cfg(windows)]
+    fn same_sid(a: &str, b: &str) -> bool {
+        use windows::Win32::Foundation::{HLOCAL, LocalFree};
+        use windows::Win32::Security::Authorization::ConvertStringSidToSidW;
+        use windows::Win32::Security::{EqualSid, PSID};
+        use windows::core::HSTRING;
+        let sid = |text: &str| {
+            let mut sid = PSID::default();
+            // SAFETY: a NUL-terminated string; the SID is freed below.
+            unsafe { ConvertStringSidToSidW(&HSTRING::from(text), &mut sid) }.expect("a SID or SDDL alias");
+            sid
+        };
+        let (a, b) = (sid(a), sid(b));
+        // SAFETY: both SIDs were made just above.
+        let same = unsafe { EqualSid(a, b) }.is_ok();
+        // SAFETY: LocalAlloc'd by the conversions.
+        unsafe {
+            LocalFree(Some(HLOCAL(a.0)));
+            LocalFree(Some(HLOCAL(b.0)));
+        }
+        same
+    }
+
     #[test]
     fn the_data_folder_is_the_users_alone() {
         let d = temp("acl");
@@ -553,13 +587,14 @@ mod tests {
             let sid = windows_acl::current_user_sid().unwrap();
             assert!(sddl.starts_with("D:P"), "inheritance from the parent is cut: {sddl}");
             assert_eq!(sddl.matches('(').count(), 1, "one entry only: {sddl}");
-            assert!(sddl.contains(&format!(";;;{sid})")), "the entry is the current user's: {sddl}");
+            let trustee = sole_ace_trustee(&sddl, "A;OICI;FA;;;");
+            assert!(same_sid(trustee, &sid), "the entry is the current user's ({sid}): {sddl}");
             // A file made inside inherits the same single entry.
             let f = d.join("setup.json");
             std::fs::write(&f, "{}").unwrap();
             let file = windows_acl::dacl_sddl(&f).unwrap();
             assert_eq!(file.matches('(').count(), 1, "{file}");
-            assert!(file.contains(&sid), "{file}");
+            assert!(same_sid(sole_ace_trustee(&file, "A;ID;FA;;;"), &sid), "{file}");
         }
         #[cfg(not(windows))]
         {
