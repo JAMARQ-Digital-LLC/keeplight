@@ -14,7 +14,7 @@ Examples worth reporting:
 
 - the app sending OpenRGB a request the safety model does not list, especially one that changes a light;
 - the app changing a light you did not set, or turning lights off;
-- the app connecting anywhere other than the OpenRGB address it was given, or writing a file the safety model does not list;
+- the app connecting anywhere other than the OpenRGB address it was given, the pinned installer links or the release feed, or writing a file the safety model does not list;
 - a crafted reply from an SDK server that makes the app crash in a way that could be exploited, or run anything.
 
 Include the app version (the bottom of the window shows it), your OpenRGB version, what you did, and what happened.

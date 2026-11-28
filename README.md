@@ -57,7 +57,7 @@ Between releases, the Main build workflow (`.github/workflows/main-build.yml`, s
 
 ## Safety
 
-[docs/safety-model.md](docs/safety-model.md) lists every request Keeplight sends to OpenRGB and every file it writes. It changes a light only when you press Put back (that device only), Keep it as before (that device only), pick a color with Color… or Set everything…, or Stop keeping a Direct-mode device that has an Onboard mode (handing it back to that), and, while Put kept lights back when you sign in is on, when the keeper starts, after the PC wakes, when OpenRGB's device list changes and when OpenRGB comes back after a restart (kept devices only).
+[docs/safety-model.md](docs/safety-model.md) lists every request Keeplight sends to OpenRGB and every file it writes. It changes a light only on a device you kept, colored or stopped keeping, or for every kept device when the keeper runs or you choose the keeper icon's **Put kept lights back now**; the same changes come from the command line, and from AI tools only with **Let AI tools make changes** on, planned first and journaled. The safety model is the full list.
 
 ## License
 

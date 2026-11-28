@@ -15,7 +15,7 @@ Reading, which happens every few seconds while the window is open:
 | `REQUEST_CONTROLLER_COUNT` (0) | How many devices there are. |
 | `REQUEST_CONTROLLER_DATA` (1) | Each device's name, modes, zones and current colors. |
 
-Changing a light, only when you press **Put back** on a device you kept, **Keep it as before** on a device you stopped keeping, or pick a color with **Color…** or **Set everything…** (see "Changes from AI tools and the command line" below), or, while the sign-in switch is on, for every kept device when the keeper starts, after the PC wakes, when OpenRGB says its device list changed, and when OpenRGB comes back after a restart:
+Changing a light, only when you press **Put back** on a device you kept, **Keep it as before** on a device you stopped keeping, **Stop keeping** on a device in Direct mode with an Onboard mode (the hand-back below), or pick a color with **Color…** or **Set everything…**; when the same changes come from the command line or an AI tool (see "Changes from AI tools and the command line" below); when you choose **Put kept lights back now** from the keeper's icon, for every kept device; or, while the sign-in switch is on, for every kept device when the keeper starts, after the PC wakes, when OpenRGB says its device list changed, and when OpenRGB comes back after a restart:
 
 | Request | Why |
 | --- | --- |
