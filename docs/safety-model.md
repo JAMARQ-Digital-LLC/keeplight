@@ -15,7 +15,7 @@ Reading, which happens every few seconds while the window is open:
 | `REQUEST_CONTROLLER_COUNT` (0) | How many devices there are. |
 | `REQUEST_CONTROLLER_DATA` (1) | Each device's name, modes, zones and current colors. |
 
-Changing a light, only when you press **Put back** on a device you kept or **Keep it as before** on a device you stopped keeping, or, while the sign-in switch is on, for every kept device when the keeper starts, after the PC wakes, when OpenRGB says its device list changed, and when OpenRGB comes back after a restart:
+Changing a light, only when you press **Put back** on a device you kept, **Keep it as before** on a device you stopped keeping, or pick a color with **Color…** or **Set everything…** (see "Changes from AI tools and the command line" below), or, while the sign-in switch is on, for every kept device when the keeper starts, after the PC wakes, when OpenRGB says its device list changed, and when OpenRGB comes back after a restart:
 
 | Request | Why |
 | --- | --- |
@@ -56,7 +56,7 @@ Tests against a fake server hold this, including `put_back_all_restores_every_ke
 
 ## Installing OpenRGB and PawnIO
 
-The one time Keeplight uses the internet, and the one time it asks for admin rights. Owner decisions, 2026-11-14: download on demand rather than bundled, and tested versions only.
+The one time Keeplight asks for admin rights, and one of the two times it uses the internet (the other is "Asking whether a newer Keeplight is out" below). Owner decisions, 2026-11-14: download on demand rather than bundled, and tested versions only.
 
 - **Only when you ask, only from the window.** When OpenRGB or PawnIO is missing or older than the version Keeplight is tested with, the window offers **Install <name> <version>…**. The button first shows what will happen (the file, its size, the site), and nothing starts until **Download and install**. AI tools and the command line can't install anything, and a newer, untested version is never downgraded.
 - **Pinned.** Each installer is listed in `core::installs::TESTED` with its official https link, exact size and SHA-256: OpenRGB 1.0.0's MSI from codeberg.org, the very package installed on JASON-PC; PawnIO 2.2.0's setup from GitHub, whose hash matches GitHub's own and which is signed by its author. A newer version joins the list only after a test on the real PC.
