@@ -1,10 +1,10 @@
 # Security
 
-Keeplight runs with your normal user rights. It never asks for admin rights, and its only connection is to OpenRGB's SDK server on `127.0.0.1`. The [safety model](docs/safety-model.md) lists every request it sends and every file it writes. In short:
+Keeplight runs with your normal user rights. It connects to OpenRGB's SDK server on `127.0.0.1`, with two exceptions: when you choose **Install…** for OpenRGB or PawnIO, it downloads the tested installer over https, checks its pinned SHA-256 and runs it after Windows' admin prompt, the only time it asks for admin rights; and the window asks the release feed over https whether a newer Keeplight is out, when it opens and once a day (**Tell me when a new Keeplight is out** turns that off). The [safety model](docs/safety-model.md) lists every request it sends and every file it writes. In short:
 
 - It never talks to lighting hardware directly; OpenRGB does.
 - It never loads, saves or deletes OpenRGB profiles.
-- This version only asks OpenRGB questions. It changes no light and writes no file. Later versions add changes one at a time, and the safety model lists each one before it ships.
+- It changes only lights you set: a device you kept, colored or stopped keeping, as the safety model lists. It writes only the files the safety model lists. New kinds of change are added to the safety model before they ship.
 
 ## Reporting a problem
 
@@ -14,7 +14,7 @@ Examples worth reporting:
 
 - the app sending OpenRGB a request the safety model does not list, especially one that changes a light;
 - the app changing a light you did not set, or turning lights off;
-- the app connecting anywhere other than the OpenRGB address it was given, or writing a file the safety model does not list;
+- the app connecting anywhere other than the OpenRGB address it was given, the pinned installer links or the release feed, or writing a file the safety model does not list;
 - a crafted reply from an SDK server that makes the app crash in a way that could be exploited, or run anything.
 
 Include the app version (the bottom of the window shows it), your OpenRGB version, what you did, and what happened.
